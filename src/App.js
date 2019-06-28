@@ -1,27 +1,40 @@
 import React from "react"
 import "./App.css"
 import Table from "./Table.js"
+import DataJS from 'data.js'
 
-function App(props) {
-  let data
+async function getData(datapackage) {
+  console.log('getData', datapackage)
+  return Promise.all(datapackage._descriptor.resources.map(async resource => {
+    resource.pathType = 'remote' // @@TODO this is set to local initially no idea why
+    const file = await DataJS.open(resource)
+    const body = file.buffer
+    console.log(resource, file, body)
+    return body
+
+    // await file.rows(), @@TODO --> 
+    // Unhandled Rejection (Error): We do not have a parser for that format: json
+  }))
+}
+
+function getViews(datapackage) {
   let views = [{}] // default to single table view
 
-  // @@TODO encapsulate / clean up datapackage validation
   try {
-    data = props.datapackage._descriptor.data
-  } catch (e) {
-    data = {}
-    console.warn("datapackage.json does not include data or is not valid", e)
-  }
-
-  try {
-    const confViews = props.datapackage._descriptor.views
+    const confViews = datapackage._descriptor.views
     views = confViews ? confViews : [{}]
   } catch (e) {
     console.log("No views found in datapackage descriptor")
   }
 
-  console.log(views)
+  return views
+}
+
+function App(props) {
+  const { datapackage } = props
+  // const views = getViews(datapackage)
+  const views = [{}]
+  const data = getData(datapackage).then(res => console.log('resolved getData', res)).catch(e => console.log('catch getData', e))
 
   const renderedViews = views.map((view, i) => {
     console.log("VUEW", view)

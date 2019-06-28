@@ -5,7 +5,8 @@
  **/
 const data = require("data.js")
 const fs = require("fs")
-const path = require("path")
+const url = 'https://datahub.io/starsinmypockets/montreal-kpis'
+const resource = data.Dataset.load(url).then(console.log)
 
 const inlineData = [
   ["a", "b", "c", "d"],
@@ -45,3 +46,7 @@ multi._descriptor.views = [
 ]
 
 fs.writeFileSync("./__fixtures__/multi.datapackage.json", JSON.stringify(multi))
+
+data.Dataset.load({pathType: 'remote', path: 'https://datahub.io/starsinmypockets/montreal-kpis'}).then(res => {
+  fs.writeFileSync("./__fixtures__/singleUrl.datapackage.json", JSON.stringify(res))
+})
